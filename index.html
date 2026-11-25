@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Portafolio digital · Felix Salinas</title>
+
+<!-- Fuentes (necesitan internet; sin conexión se usa una fuente parecida del equipo) -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,400;0,700;1,400&family=Londrina+Solid:wght@400;900&display=swap" rel="stylesheet">
+
+<style>
+
+:root{
+  --fuente-titulos:"Londrina Solid","Arial Narrow",Impact,sans-serif;
+  --fuente-texto:"Inter",system-ui,Arial,sans-serif;
+
+  --letra-encabezado:clamp(1.7rem, min(3.6vw, 6.5vh), 4.5rem);
+  --letra-menu:clamp(1.15rem, min(2.1vw, 4vh), 2.6rem);
+  --letra-submenu:clamp(.95rem, min(1.6vw, 2.9vh), 1.9rem);
+  --letra-grande:clamp(1.25rem, min(2.5vw, 4.3vh), 3.2rem);
+  --letra-texto:clamp(1rem, min(1.75vw, 3vh), 2.1rem);
+
+  --ancho-menu:clamp(112px, 15vw, 290px);
+  --ancho-franja:clamp(42px, 5.2vw, 100px);
+  --alto-encabezado:clamp(64px, 13vh, 150px);
+}
+
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;overflow:hidden}
+body{font-family:var(--fuente-texto);color:#000}
+a{color:inherit;text-decoration:none}
+
+.app{
+  --c1:#8aa582; --c2:#3c4c41; --franja2:#4e614e;
+  position:fixed;inset:0;
+  display:grid;
+  grid-template-columns:var(--ancho-menu) var(--ancho-franja) minmax(0,1fr);
+  grid-template-rows:var(--alto-encabezado) minmax(0,1fr);
+  transition:grid-template-columns .35s ease;
+}
+.app.menu-cerrado{grid-template-columns:0px var(--ancho-franja) minmax(0,1fr)}
+
+/* Colores de cada sección */
+.app[data-tema="inicio"]   {--c1:#8aa582;--c2:#3c4c41;--franja2:#4e614e}
+.app[data-tema="sobre-mi"] {--c1:#bb8d73;--c2:#b6a0a2;--franja2:#bfabb4}
+.app[data-tema="proyectos"]{--c1:#bae4f2;--c2:#87a0a7;--franja2:#95acb2}
+.app[data-tema="contacto"] {--c1:#dd422c;--c2:#883527;--franja2:#863325}
+
+.encabezado{
+  grid-column:1 / -1;
+  display:flex;align-items:center;justify-content:center;
+  padding:0 1rem;text-align:center;
+  background:linear-gradient(90deg,var(--c1) 70%,var(--c2));
+}
+.app[data-tema="proyectos"] .encabezado{background:linear-gradient(90deg,var(--c1) 25%,var(--c2) 75%)}
+.encabezado h1{
+  font:900 var(--letra-encabezado)/1 var(--fuente-titulos);
+  text-transform:uppercase;
+}
+
+
+.menu{
+  grid-column:1;grid-row:2;
+  min-height:0;overflow:hidden auto;
+  background:linear-gradient(#3f4140,#9fa3a4);
+}
+.menu-interior{
+  width:var(--ancho-menu);min-height:100%;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:clamp(.8rem,4.5vh,3.5rem);
+  padding:1rem .4rem;text-align:center;
+}
+.menu-link{
+  display:block;width:100%;
+  font:900 var(--letra-menu)/1.05 var(--fuente-titulos);
+  text-transform:uppercase;color:#000;
+  transition:color .15s;
+}
+.menu-link:hover,.menu-link:focus-visible,.menu-link.activo{color:#fff}
+
+/* Lista desplegable de "Mis proyectos" */
+.grupo{width:100%}
+.submenu{
+  display:grid;grid-template-rows:0fr;visibility:hidden;
+  transition:grid-template-rows .35s ease, visibility .35s;
+}
+.submenu ul{list-style:none;overflow:hidden;min-height:0}
+.submenu li:first-child{padding-top:clamp(.4rem,2vh,1.4rem)}
+.submenu a{
+  display:block;padding:clamp(.25rem,1vh,.8rem) 0;
+  font-size:var(--letra-submenu);line-height:1.15;
+  color:#939596;transition:color .15s;
+}
+.submenu a:hover,.submenu a:focus-visible,.submenu a.activo{color:#fff}
+.grupo.abierto .submenu{grid-template-rows:1fr;visibility:visible}
+
+
+.franja{
+  grid-column:2;grid-row:2;
+  display:flex;align-items:center;justify-content:center;
+  background:linear-gradient(var(--c1) 55%,var(--franja2) 90%);
+}
+.app[data-tema="proyectos"] .franja{background:linear-gradient(var(--c1),var(--franja2) 60%)}
+.flecha{
+  width:100%;padding:1rem 0;border:0;background:none;cursor:pointer;color:#000;
+  font:400 clamp(3rem,6vw,7rem)/1 var(--fuente-titulos);
+  transition:color .15s, transform .15s;
+}
+.flecha:hover,.flecha:focus-visible{color:#fff;transform:scale(1.12)}
+
+
+main{grid-column:3;grid-row:2;min-width:0;min-height:0;position:relative}
+.pagina{position:absolute;inset:0}
+.pagina[hidden]{display:none}
+
+.titulo{
+  font:900 var(--letra-grande)/1.08 var(--fuente-titulos);
+  text-transform:uppercase;
+}
+
+/* Espacios para imágenes */
+.img{
+  position:relative;overflow:hidden;
+  display:flex;align-items:center;justify-content:center;
+  background:#e4e7ea;border:2px dashed #8b949b;
+}
+.img::before{
+  content:"Espacio para imagen\A" attr(data-img);
+  white-space:pre-wrap;overflow-wrap:anywhere;text-align:center;text-transform:none;padding:.5rem;
+  font:400 clamp(.7rem,1.1vw,1rem)/1.5 var(--fuente-texto);color:#4a5258;
+}
+.img img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain}
+.img.relleno img{object-fit:cover}
+.img.con-imagen{border:0;background:transparent}
+.img.con-imagen::before{display:none}
+
+
+.dos-columnas{display:grid;height:100%;grid-template-columns:minmax(0,1fr) 20%}
+.panel{
+  height:100%;overflow:auto;
+  display:flex;flex-direction:column;
+  padding:clamp(1rem,3vw,4rem);
+}
+.panel > div{margin:auto;width:100%;max-width:34em}
+.panel .titulo{font-size:var(--letra-grande)}
+.panel > div{font:900 var(--letra-grande)/1.12 var(--fuente-titulos);text-transform:uppercase}
+.panel p{margin-top:1em}
+.panel p:first-child{margin-top:0}
+.lado.img{height:100%;border-width:0 0 0 2px}
+
+#p-inicio .panel{background:#8ed0e6}
+#p-inicio h2{text-align:center}
+#p-sobre-mi .dos-columnas{grid-template-columns:minmax(0,1fr) 30%}
+#p-sobre-mi .panel{background:#694e83}
+#p-contacto .panel{background:#edd8bd}
+#p-contacto .panel > div{max-width:52em;display:flex;align-items:center;gap:4%}
+#p-contacto .datos{flex:1;min-width:0;overflow-wrap:anywhere}
+#p-contacto .datos a:hover{color:#a52a1a}
+#p-contacto .icono{width:22%;aspect-ratio:1;flex:none}
+
+
+.portada{position:relative;overflow:hidden;display:block;min-height:0}
+.portada .img{position:absolute;border:0}
+.portada .texto{
+  position:relative;z-index:1;pointer-events:none;
+  font:900 clamp(1.6rem,min(4vw,7vh),5rem)/1.02 var(--fuente-titulos);
+  text-transform:uppercase;text-align:center;
+}
+.portada .img.con-imagen{background:transparent}
+
+
+.p-potc{background:#35200f;color:#fff;display:flex;align-items:center;justify-content:center}
+.p-potc .img{inset:0;background:#35200f}
+.p-potc .img::before{color:#d9c4ad;position:absolute;bottom:0;right:0;white-space:pre-wrap}
+.p-potc .texto{text-shadow:0 2px 10px rgba(0,0,0,.7)}
+
+
+.p-burnout{background:#f3eefc;display:flex;align-items:center;justify-content:center}
+.p-burnout .img{inset:0;background:#f3eefc}
+.p-burnout .img::before{position:absolute;bottom:0;right:0}
+
+
+.p-creo,.p-festival{background:#fff;display:flex;align-items:center;justify-content:center;padding:1rem;gap:3%}
+.p-creo .img,.p-festival .img{position:relative;border:2px dashed #8b949b}
+.p-creo .img.con-imagen,.p-festival .img.con-imagen{border:0}
+.p-festival{background:#fff9f3}
+
+
+.cuadricula{display:grid;height:100%;grid-template:repeat(2,minmax(0,1fr)) / repeat(2,minmax(0,1fr))}
+.cuadricula .portada{cursor:pointer}
+.cuadricula .portada::after{
+  content:"";position:absolute;inset:0;z-index:2;
+  box-shadow:inset 0 0 0 0 #2f6f86;transition:box-shadow .2s, background .2s;
+}
+.cuadricula .portada:hover::after,.cuadricula .portada:focus-visible::after{box-shadow:inset 0 0 0 6px #2f6f86;background:rgba(135,160,167,.14)}
+.cuadricula .p-creo{flex-direction:column;gap:2%}
+.cuadricula .p-creo .img{width:70%;flex:1;min-height:0;max-height:55%}
+.cuadricula .p-festival .texto{max-width:55%}
+.cuadricula .p-festival .img{width:42%;height:90%}
+
+
+.proyecto{display:flex;flex-direction:column;height:100%;background:#fff}
+.proyecto > .portada{flex:none;height:26%;min-height:110px}
+.proyecto > .p-creo,.proyecto > .p-festival{height:32%;background:#fff}
+.proyecto > .p-burnout .texto{margin-right:auto;margin-left:6%}
+.proyecto > .p-burnout .img img{object-position:right center}
+.proyecto > .p-creo .img{flex:0 0 45%;height:100%}
+.proyecto > .p-festival{padding:0;justify-content:space-between}
+.proyecto > .p-festival .texto{flex:1;padding:0 1rem}
+.proyecto > .p-festival .img{flex:none;width:28%;height:100%}
+
+.scroll{flex:1;min-height:0;overflow-y:auto;scroll-behavior:smooth}
+.scroll:focus{outline:none}
+.bloque{
+  padding:clamp(1.2rem,4vh,3.5rem) clamp(1rem,3.5vw,4.5rem);
+  font-size:var(--letra-texto);line-height:1.45;
+}
+.bloque p{margin-bottom:1em}
+.bloque h3{font-size:1.2em;text-align:center;margin-bottom:1em}
+.cita{font-style:italic}
+.enlace{overflow-wrap:anywhere}
+.enlace:hover{color:#1c5f9e;text-decoration:underline}
+
+.fotos{display:grid;gap:clamp(1rem,4vw,5rem);align-items:start;margin-top:1.5em}
+.fotos.dos{grid-template-columns:repeat(2,minmax(0,1fr))}
+.fotos.tres{grid-template-columns:repeat(3,minmax(0,1fr))}
+figure{text-align:center}
+figure .img{width:100%;aspect-ratio:4/3;margin-bottom:.6em}
+.tres .img{aspect-ratio:9/16}
+.una{width:min(100%,46em,85vh);margin:0 auto}
+.una.ancha{width:100%;max-width:48em}
+.fotos.dos .img{max-height:45vh}
+
+
+::view-transition-group(portada){animation-duration:.6s;animation-timing-function:cubic-bezier(.65,0,.25,1)}
+::view-transition-old(portada),::view-transition-new(portada){height:100%;width:100%;object-fit:cover}
+
+
+@media (max-width:700px){
+  :root{--ancho-menu:104px;--ancho-franja:34px;--letra-menu:1rem;--letra-submenu:.85rem}
+  .menu-interior{padding-inline:.2rem}
+  .dos-columnas,#p-sobre-mi .dos-columnas{display:block;overflow-y:auto}
+  .dos-columnas .panel{height:auto;min-height:65%}
+  .lado.img{height:55vh;border-width:2px 0 0}
+  #p-contacto .panel > div{flex-direction:column;gap:1.5rem}
+  #p-contacto .icono{width:50%}
+  .cuadricula{display:block;overflow-y:auto}
+  .cuadricula .portada{height:34%;min-height:150px}
+  .fotos.dos,.fotos.tres{grid-template-columns:minmax(0,1fr)}
+  .portada .texto{font-size:1.5rem}
+  .proyecto > .p-creo,.proyecto > .p-festival{height:24%}
+  .proyecto > .p-creo{flex-direction:column;gap:.4rem}
+  .proyecto > .p-creo .img{flex:1 1 0;min-height:0;width:85%}
+  .proyecto > .p-festival .img{width:38%}
+  .proyecto > .p-festival .texto{min-width:0;font-size:1.25rem;padding:0 .3rem}
+}
+
+@media (prefers-reduced-motion:reduce){
+  *{transition:none!important;scroll-behavior:auto!important}
+}
+</style>
+</head>
+<body>
+
+<div class="app" data-tema="inicio">
+
+  <header class="encabezado"><h1 id="titulo">El principio</h1></header>
+
+
+  <nav class="menu" id="menu" aria-label="Menú principal">
+    <div class="menu-interior">
+      <a class="menu-link" href="#inicio" data-nav="inicio">Inicio</a>
+      <a class="menu-link" href="#sobre-mi" data-nav="sobre-mi">Sobre mí</a>
+      <div class="grupo" id="grupo">
+        <a class="menu-link" href="#proyectos" data-nav="proyectos" id="btn-proyectos" aria-expanded="false">Mis<br>proyectos</a>
+        <div class="submenu">
+          <ul>
+            <li><a href="#pot-c" data-nav="pot-c">POT-C</a></li>
+            <li><a href="#burnout" data-nav="burnout">Burnout</a></li>
+            <li><a href="#creo" data-nav="creo">Creo</a></li>
+            <li><a href="#festival" data-nav="festival">Festival<br>Cultural</a></li>
+          </ul>
+        </div>
+      </div>
+      <a class="menu-link" href="#contacto" data-nav="contacto">Contacto</a>
+    </div>
+  </nav>
+
+  <div class="franja">
+    <button class="flecha" id="flecha" type="button" aria-controls="menu" aria-expanded="true" aria-label="Cerrar menú">&lt;</button>
+  </div>
+
+  <main>
+
+
+    <section class="pagina" id="p-inicio">
+      <div class="dos-columnas">
+        <div class="panel"><div>
+          <h2 class="titulo">Bienvenido a mi portafolio</h2>
+          <p>¡Hola! Mi nombre es Felix y este es mi espacio digital.</p>
+          <p>Aqui conoceras un poco de mi, sobre mis habilidades; en lo que soy bueno. Pero no solamente eso, tambien tendras la oportunidad de ponerme en contacto conmigo.</p>
+          <p>Explora este portafolio digital para revisar toda la informacion disponible.</p>
+        </div></div>
+        <div class="img relleno lado" data-img="inicio-fondo"></div>
+      </div>
+    </section>
+
+    <section class="pagina" id="p-sobre-mi" hidden>
+      <div class="dos-columnas">
+        <div class="panel"><div>
+          <p>Como ya lo he dicho, mi nombre es Felix Josue Salinas Renderos y en este espacio les quiero contar un poco mas sobre mi</p>
+          <p>Soy un estudiante recien graduado de bachillerato que le apasiona la tecnologia y el idioma extranjero del ingles.</p>
+          <p>Soy alguien amable, responsable, dedicado, curioso y sobretodo respetuoso al momento de discutir sobre diversos temas.</p>
+          <p>No solamente eso, tambien soy alguien muy paciente y tolerante a situaciones y momentos especificos.</p>
+        </div></div>
+        <div class="img relleno lado" data-img="mi-foto"></div>
+      </div>
+    </section>
+
+    <section class="pagina" id="p-proyectos" hidden>
+      <div class="cuadricula">
+        <a class="portada p-potc" href="#pot-c">
+          <div class="img relleno" data-img="potc-portada"></div>
+          <span class="texto">POT-C</span>
+        </a>
+        <a class="portada p-burnout" href="#burnout">
+          <div class="img relleno" data-img="burnout-portada"></div>
+          <span class="texto">Investigacion:<br>Burnout</span>
+        </a>
+        <a class="portada p-creo" href="#creo">
+          <span class="texto">Experiencia en:</span>
+          <div class="img" data-img="creo-logo"></div>
+        </a>
+        <a class="portada p-festival" href="#festival">
+          <span class="texto">Festival<br>Cultural<br>de<br>Ingles</span>
+          <div class="img" data-img="festival-portada"></div>
+        </a>
+      </div>
+    </section>
+
+    <section class="pagina" id="p-pot-c" hidden>
+      <div class="proyecto">
+        <div class="portada p-potc">
+          <div class="img relleno" data-img="potc-portada"></div>
+          <h2 class="texto">POT-C</h2>
+        </div>
+        <div class="scroll" tabindex="0">
+          <article class="bloque">
+            <p>POT-C fue un proyecto que se realizo durante el periodo de 2025-2026 para los eventos de “EXPO de logros” y “EXPOTECH”. Este mismo consistia en un basurero inteligente que convierte la basura organica en composta. Este basurero se podia ajustar a cualquier rincon de tu casa, no producia malos olores y el proceso de composta era rapido y eficiente.</p>
+            <p>En nuestro proceso, desarrollamos un modelo 3D y una pagina web para mostrar mayor información de lo que nuestro basurero podia hacer.</p>
+            <div class="fotos dos">
+              <figure><div class="img" data-img="potc-modelo-3d"></div><figcaption>Imagen del model 3D</figcaption></figure>
+              <figure><div class="img" data-img="potc-logo"></div><figcaption>Logo de POT-C</figcaption></figure>
+            </div>
+          </article>
+          <article class="bloque" data-parte="pagina-web">
+            <p>En cuanto a mi participación en este proyecto, yo servi de apoyo en el desarrollo de la pagina web, en un prototipo en fisico y en el desarrollo de algunas pantallas del prototipo de la aplicación.</p>
+            <h3>Fotos de la pagina web</h3>
+            <div class="fotos dos">
+              <figure><div class="img" data-img="potc-web-1"></div></figure>
+              <figure><div class="img" data-img="potc-web-2"></div></figure>
+            </div>
+          </article>
+          <article class="bloque" data-parte="aplicacion">
+            <h3>Fotos del prototipo de la aplicación</h3>
+            <div class="fotos tres una ancha">
+              <figure><div class="img" data-img="potc-app-1"></div></figure>
+              <figure><div class="img" data-img="potc-app-2"></div></figure>
+              <figure><div class="img" data-img="potc-app-3"></div></figure>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="pagina" id="p-burnout" hidden>
+      <div class="proyecto">
+        <div class="portada p-burnout">
+          <div class="img relleno" data-img="burnout-portada"></div>
+          <h2 class="texto">Investigacion:<br>Burnout</h2>
+        </div>
+        <div class="scroll" tabindex="0">
+          <article class="bloque">
+            <p>Vamos a empezar con una pregunta que probablemente se pregunten ¿Qué es el burnout?</p>
+            <p>El síndrome de burnout es reconocido actualmente por la Organización Mundial de la Salud (OMS), en la Clasificación Internacional de Enfermedades (CIE-11), como un fenómeno estrictamente vinculado al ámbito laboral, originado por un estrés crónico que no ha sido manejado de forma adecuada. Se caracteriza por tres dimensiones principales propuestas por Maslach y Jackson: agotamiento energético, distanciamiento o actitud cínica frente al trabajo, y una disminución en la eficacia profesional.</p>
+            <p>Esta investigación se implemento dentro del Colegio Hispanoamérica, donde investigamos, analizamos y corroboramos a los docentes de la institución para confirmar nuestra hipótesis planteada: El exceso de carga laboral y las exigencias profesionales influyen en la aparición del síndrome de burnout en los docentes del Colegio Hispanoamérica.</p>
+            <p>Para esto utilizamos el formulario “Cuestionario de Burnout de Maslach para Docentes (MBI-Ed)” para confirmar la presencia del síndrome de burnout en los docente y creamos un formulario propio en Google forms para comprobar nuestra hipótesis de investigación.</p>
+          </article>
+          <article class="bloque" data-parte="resultados">
+            <h3>Resultados del cuestionario aplicado</h3>
+            <figure class="una"><div class="img" data-img="burnout-resultados"></div></figure>
+          </article>
+          <article class="bloque" data-parte="aportes">
+            <p>Con respecto a mis aportes a esta investigación, yo fui el encargado de organizar el documento y poner en orden la estructura de este mismo. Además, también aporte en partes de la investigación como la situación problemática y los antecedentes donde me encontré fuentes valiosas como las siguientes:</p>
+            <p class="cita">Delgado, P. (2025, 28 de febrero). Entre la pasión y el agotamiento: El burnout docente. Observatorio | Instituto para el Futuro de la Educación, Tecnológico de Monterrey.</p>
+            <p class="cita">Arévalo Carrillo, R., &amp; Henríquez Sánchez, J. S. (2022). Síndrome de burnout en los docentes del sector público de la zona urbana del municipio de Santa Tecla [Tesis de maestría, Universidad Centroamericana José Simeón Cañas].</p>
+            <p>Aquí les dejo el enlace del documento completa para que le den un vistazo a ustedes mismo al trabajo que hicimos mi equipo y yo:</p>
+            <p><a class="enlace" href="https://docs.google.com/document/d/1whG77TATwFLYOzycNKv00gJUIwWg8y2po0WJdtMh7f0/edit?usp=sharing" target="_blank" rel="noopener">https://docs.google.com/document/d/1whG77TATwFLYOzycNKv00gJUIwWg8y2po0WJdtMh7f0/edit?usp=sharing</a></p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="pagina" id="p-creo" hidden>
+      <div class="proyecto">
+        <div class="portada p-creo">
+          <h2 class="texto">Mi experiencia<br>en:</h2>
+          <div class="img" data-img="creo-logo"></div>
+        </div>
+        <div class="scroll" tabindex="0">
+          <article class="bloque">
+            <p>CREO es un programa de formación juvenil impulsado por FUSADES que busca fortalecer el liderazgo, la participación ciudadana y el pensamiento analítico de los jóvenes salvadoreños.</p>
+            <p>Durante este periodo, tuve la oportunidad de formarme como un ciudadano a futuro. Aprendí a como ser un ciudadano modelo, a cómo resolver pequeños conflictos entre cierto grupo social, sobre la democracia y como este nos puede ayudar y desarrollé un poco de liderazgo a lo largo de estas sesiones. Mi rol fue como estudiante, aprendiendo de lo que ellos me enseñaban a través de diversas sesiones donde abarcábamos temas como la democracia y la participación ciudadana.</p>
+            <p>Además de eso, también pude experimentar un poco más de compañerismo con mis colegas de trabajo y estudio durante situaciones sociales; asi como el fortalecer los lazos y estrechar mis relaciones con mis actuales amigos y compañeros.</p>
+            <p>Alfinal de estas sesiones me gane un diploma que me reconoce que participe en este Curso de Ciudadania y haberlo completado de manera exitosa.</p>
+          </article>
+          <article class="bloque" data-parte="diploma">
+            <h3>Foto del diploma</h3>
+            <figure class="una"><div class="img" data-img="creo-diploma"></div></figure>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="pagina" id="p-festival" hidden>
+      <div class="proyecto">
+        <div class="portada p-festival">
+          <h2 class="texto">Festival Cultural de<br>Ingles</h2>
+          <div class="img" data-img="festival-portada"></div>
+        </div>
+        <div class="scroll" tabindex="0">
+          <article class="bloque">
+            <p>Esta actividad consistió en una recopilación de puestos de diversos países dentro del Colegio Hispanoamérica. Este evento estaba abierto para todo publico; asi como para los interesados en conocer un poco de un país diferente en el idioma ingles.</p>
+            <p>En esta feria me enfrente al reto de hablar enfrente de jurados, pero en el idioma de inglés, describiendo lo hermoso del país de Costa Rica. Todo este trabajo se realizó en grupo. En este evento nos pusimos de acuerdo para que algunos miembros trajeran la vestimenta de ese país, e hicimos un cartel que mostraba un resumen de todo lo que íbamos a hablar.</p>
+            <p>El principal rol que yo tome durante esta exposición fue la de dar a conocer los símbolos patrios y un poco de la flora y fauna de Costa Rica. Mi rol secundario fue en la organización y repartición de lo que iba a hablar cada uno de los integrantes del grupo de Costa Rica; véase la cultura, la comida, la flora y fauna, la moneda y la religión.</p>
+          </article>
+          <article class="bloque" data-parte="foto">
+            <h3>Foto grupal de mi equipo con el puesto y el cartel</h3>
+            <figure class="una"><div class="img" data-img="festival-foto-grupal"></div></figure>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="pagina" id="p-contacto" hidden>
+      <div class="panel"><div>
+        <div class="datos">
+          <p>Aqui te presento las diversas formas de tener contacto conmigo, ya sea para hacer negios o simplemente para que puedas ver en que lo puedo apoyar u asistir:</p>
+          <p>Correo: <a href="mailto:fjsalinasrnd@gmail.com">fjsalinasrnd@gmail.com</a></p>
+          <p>Numero: <a href="tel:+50378426709">7842 – 6709</a></p>
+          <p>Direccion: 5ta calle poniente,<br>Santa Tecla</p>
+          <p>Horario: 9:00 a.m – 4:30 p.m</p>
+        </div>
+        <div class="img icono" data-img="contacto-icono"></div>
+      </div></div>
+    </section>
+
+  </main>
+</div>
+
+<script>
+
+const EXTENSIONES = ["jpg", "png", "jpeg", "webp", "svg"];
+
+document.querySelectorAll("[data-img]").forEach(espacio => {
+  let i = 0;
+  const img = new Image();
+  img.alt = espacio.dataset.img.replace(/-/g, " ");
+  img.onload  = () => { espacio.appendChild(img); espacio.classList.add("con-imagen"); };
+  img.onerror = () => { if (++i < EXTENSIONES.length) probar(); };
+  const probar = () => { img.src = `imagenes/${espacio.dataset.img}.${EXTENSIONES[i]}`; };
+  probar();
+});
+
+
+const RUTAS = {
+  "inicio":    { tema: "inicio",    titulo: "El principio" },
+  "sobre-mi":  { tema: "sobre-mi",  titulo: "Conoce un poco de mí" },
+  "proyectos": { tema: "proyectos", titulo: "Conoce algunos de mis proyectos" },
+  "pot-c":     { tema: "proyectos", titulo: "Conoce algunos de mis proyectos" },
+  "burnout":   { tema: "proyectos", titulo: "Conoce algunos de mis proyectos" },
+  "creo":      { tema: "proyectos", titulo: "Conoce algunos de mis proyectos" },
+  "festival":  { tema: "proyectos", titulo: "Conoce algunos de mis proyectos" },
+  "contacto":  { tema: "contacto",  titulo: "Mis formas de contactarme" }
+};
+
+const app = document.querySelector(".app");
+const grupo = document.getElementById("grupo");
+const btnProyectos = document.getElementById("btn-proyectos");
+const flecha = document.getElementById("flecha");
+const menu = document.getElementById("menu");
+let miniaturaElegida = null;
+
+function leerRuta() {
+  const [pagina, parte] = location.hash.slice(1).split("/");
+  return RUTAS[pagina] ? { pagina, parte } : { pagina: "inicio" };
+}
+
+function abrirLista(abrir) {
+  grupo.classList.toggle("abierto", abrir);
+  btnProyectos.setAttribute("aria-expanded", abrir);
+}
+
+function irAParte(seccion, parte, suave) {
+  const zona = seccion.querySelector(".scroll");
+  if (!zona) return;
+  const bloque = parte && zona.querySelector(`[data-parte="${CSS.escape(parte)}"]`);
+  const arriba = bloque ? bloque.getBoundingClientRect().top - zona.getBoundingClientRect().top + zona.scrollTop : 0;
+  zona.scrollTo({ top: arriba, behavior: suave ? "smooth" : "instant" });
+}
+
+function mostrar() {
+  const { pagina, parte } = leerRuta();
+  const ruta = RUTAS[pagina];
+  const seccion = document.getElementById("p-" + pagina);
+  const yaVisible = !seccion.hidden;
+
+  app.dataset.tema = ruta.tema;
+  document.getElementById("titulo").textContent = ruta.titulo;
+  document.querySelectorAll(".pagina").forEach(p => p.hidden = p !== seccion);
+
+  // Marca en blanco la sección y el subtema activos
+  document.querySelectorAll("[data-nav]").forEach(a => {
+    const activo = a.dataset.nav === pagina || (a === btnProyectos && ruta.tema === "proyectos");
+    a.classList.toggle("activo", activo);
+    if (a.dataset.nav === pagina) a.setAttribute("aria-current", "page");
+    else a.removeAttribute("aria-current");
+  });
+
+  abrirLista(ruta.tema === "proyectos");
+  irAParte(seccion, parte, yaVisible);
+  seccion.querySelector(".scroll")?.focus({ preventScroll: true });
+}
+
+// La imagen elegida se transforma en el encabezado del proyecto
+function cambiarPagina() {
+  const miniatura = miniaturaElegida;
+  miniaturaElegida = null;
+  const sinAnimacion = matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  if (!miniatura || !document.startViewTransition || sinAnimacion) { mostrar(); return; }
+
+  let encabezado;
+  miniatura.style.viewTransitionName = "portada";
+  const transicion = document.startViewTransition(() => {
+    miniatura.style.viewTransitionName = "";
+    mostrar();
+    encabezado = document.querySelector(".pagina:not([hidden]) .proyecto > .portada");
+    if (encabezado) encabezado.style.viewTransitionName = "portada";
+  });
+  transicion.finished.finally(() => { if (encabezado) encabezado.style.viewTransitionName = ""; });
+}
+
+document.querySelectorAll(".cuadricula .portada").forEach(m =>
+  m.addEventListener("click", e => {
+    if (e.button === 0 && !e.ctrlKey && !e.metaKey && !e.shiftKey) miniaturaElegida = m;
+  })
+);
+
+
+document.querySelectorAll("[data-nav]").forEach(a =>
+  a.addEventListener("click", e => {
+    const { pagina, parte } = leerRuta();
+    if (a.dataset.nav !== pagina || parte) return;
+    e.preventDefault();
+    if (a === btnProyectos) abrirLista(!grupo.classList.contains("abierto"));
+    else irAParte(document.getElementById("p-" + pagina), null, true);
+  })
+);
+
+// Flecha: abre y cierra el menú
+flecha.addEventListener("click", () => {
+  const cerrado = app.classList.toggle("menu-cerrado");
+  flecha.textContent = cerrado ? ">" : "<";
+  flecha.setAttribute("aria-expanded", !cerrado);
+  flecha.setAttribute("aria-label", cerrado ? "Abrir menú" : "Cerrar menú");
+  menu.inert = cerrado;
+});
+
+/* Inicio, Sobre mí y Contacto: la letra se agranda o reduce
+   hasta llenar el espacio disponible (en computadora) */
+const TAMANO_MINIMO = 16, TAMANO_MAXIMO = 60;
+
+function ajustarLetra(panel) {
+  const texto = panel.firstElementChild;
+  texto.style.fontSize = "";
+  texto.querySelectorAll(".titulo").forEach(t => t.style.fontSize = "1.15em");
+  if (!panel.clientHeight || matchMedia("(max-width:700px)").matches) return;
+
+  const estilo = getComputedStyle(panel);
+  const libre = panel.clientHeight - parseFloat(estilo.paddingTop) - parseFloat(estilo.paddingBottom);
+  let min = TAMANO_MINIMO, max = TAMANO_MAXIMO;
+  while (max - min > .5) {
+    const medio = (min + max) / 2;
+    texto.style.fontSize = medio + "px";
+    if (texto.offsetHeight <= libre) min = medio; else max = medio;
+  }
+  texto.style.fontSize = min + "px";
+}
+
+const paneles = document.querySelectorAll(".panel");
+const observador = new ResizeObserver(lista => lista.forEach(e => ajustarLetra(e.target)));
+paneles.forEach(p => observador.observe(p));
+document.fonts.ready.then(() => paneles.forEach(ajustarLetra));
+
+window.addEventListener("hashchange", cambiarPagina);
+mostrar();
+</script>
+</body>
+</html>

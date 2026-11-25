@@ -1,0 +1,19 @@
+Guarda aquí tus imágenes con estos nombres (formato .jpg, .png, .jpeg, .webp o .svg, en minúsculas):
+
+- inicio-fondo
+- mi-foto
+- potc-portada
+- burnout-portada
+- creo-logo
+- festival-portada
+- potc-modelo-3d
+- potc-logo
+- potc-web-1
+- potc-web-2
+- potc-app-1
+- potc-app-2
+- potc-app-3
+- burnout-resultados
+- creo-diploma
+- festival-foto-grupal
+- contacto-icono
